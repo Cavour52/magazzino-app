@@ -159,13 +159,16 @@ export default function App() {
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
-        <select style={styles.select} value={filter} onChange={e => setFilter(e.target.value)}>
+      </div>
+
+      <div style={styles.filterRow}>
+        <select style={styles.selectHalf} value={filter} onChange={e => setFilter(e.target.value)}>
           <option value="all">Tutti</option>
           <option value="ok">Disponibili</option>
           <option value="low">In esaurimento</option>
           <option value="out">Esauriti</option>
         </select>
-        <select style={styles.select} value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)}>
+        <select style={styles.selectHalf} value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)}>
           <option value="all">Tutti i fornitori</option>
           {suppliers.map(s => (
             <option key={s} value={s}>{s}</option>
@@ -230,6 +233,8 @@ const styles = {
     margin: '0 auto',
     padding: '28px 18px 60px',
     minHeight: '100vh',
+    boxSizing: 'border-box',
+    width: '100%',
   },
   loadingScreen: {
     minHeight: '100vh',
@@ -318,10 +323,17 @@ const styles = {
   controls: {
     display: 'flex',
     gap: 8,
+    marginBottom: 10,
+  },
+  filterRow: {
+    display: 'flex',
+    gap: 8,
     marginBottom: 16,
+    flexWrap: 'wrap',
   },
   search: {
     flex: 1,
+    minWidth: 0,
     border: '1px solid var(--line)',
     background: 'var(--card)',
     borderRadius: 'var(--radius-sm)',
@@ -329,6 +341,7 @@ const styles = {
     fontSize: 14,
     color: 'var(--ink)',
     outline: 'none',
+    boxSizing: 'border-box',
   },
   select: {
     border: '1px solid var(--line)',
@@ -337,6 +350,17 @@ const styles = {
     padding: '10px 10px',
     fontSize: 14,
     color: 'var(--ink)',
+  },
+  selectHalf: {
+    flex: '1 1 0',
+    minWidth: 0,
+    border: '1px solid var(--line)',
+    background: 'var(--card)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '10px 8px',
+    fontSize: 14,
+    color: 'var(--ink)',
+    boxSizing: 'border-box',
   },
   list: {
     display: 'flex',
