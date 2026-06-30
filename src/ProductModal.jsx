@@ -8,6 +8,8 @@ export default function ProductModal({ initial, suppliers = [], onAddSupplier, o
   const [supplier, setSupplier] = useState(initial?.supplier || '')
   const [addingSupplier, setAddingSupplier] = useState(false)
   const [newSupplierName, setNewSupplierName] = useState('')
+  const [ordered, setOrdered] = useState(initial?.ordered || false)
+  const [orderedDate, setOrderedDate] = useState(initial?.orderedDate || '')
 
   function handleSupplierChange(e) {
     const value = e.target.value
@@ -27,6 +29,17 @@ export default function ProductModal({ initial, suppliers = [], onAddSupplier, o
     setAddingSupplier(false)
   }
 
+  function toggleOrdered() {
+    const next = !ordered
+    setOrdered(next)
+    if (next) {
+      const today = new Date().toISOString().slice(0, 10)
+      setOrderedDate(today)
+    } else {
+      setOrderedDate('')
+    }
+  }
+
   function handleSave() {
     if (!name.trim()) return
     onSave({
@@ -35,6 +48,8 @@ export default function ProductModal({ initial, suppliers = [], onAddSupplier, o
       threshold: Math.max(0, parseInt(threshold) || 0),
       unit: unit.trim() || 'pz',
       supplier: supplier || '',
+      ordered: ordered,
+      orderedDate: ordered ? orderedDate : null,
     })
   }
 
@@ -82,6 +97,18 @@ export default function ProductModal({ initial, suppliers = [], onAddSupplier, o
             <button style={styles.saveBtn} onClick={confirmNewSupplier}>Aggiungi</button>
           </div>
         )}
+
+        <div style={styles.orderedRow} onClick={toggleOrdered}>
+          <div style={{ ...styles.toggle, background: ordered ? 'var(--moss-deep)' : 'var(--line)' }}>
+            <div style={{ ...styles.toggleDot, transform: ordered ? 'translateX(16px)' : 'translateX(0)' }} />
+          </div>
+          <div>
+            <p style={styles.orderedLabel}>Ordinato al fornitore</p>
+            {ordered && orderedDate && (
+              <p style={styles.orderedDate}>Ordinato il {new Date(orderedDate).toLocaleDateString('it-IT')}</p>
+            )}
+          </div>
+        </div>
 
         <div style={styles.actions}>
           {onDelete && (
@@ -137,6 +164,45 @@ const styles = {
   row: {
     display: 'flex',
     gap: 10,
+  },
+  orderedRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 16,
+    padding: '10px 12px',
+    background: 'var(--paper)',
+    borderRadius: 10,
+    cursor: 'pointer',
+  },
+  toggle: {
+    width: 36,
+    height: 20,
+    borderRadius: 999,
+    flexShrink: 0,
+    position: 'relative',
+    transition: 'background 0.15s',
+  },
+  toggleDot: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    width: 16,
+    height: 16,
+    borderRadius: '50%',
+    background: '#FFF',
+    transition: 'transform 0.15s',
+  },
+  orderedLabel: {
+    margin: 0,
+    fontSize: 14,
+    fontWeight: 500,
+    color: 'var(--ink)',
+  },
+  orderedDate: {
+    margin: '2px 0 0',
+    fontSize: 12,
+    color: 'var(--ink-faint)',
   },
   actions: {
     display: 'flex',

@@ -88,7 +88,12 @@ export default function App() {
 
   async function changeQty(product, delta) {
     const newQty = Math.max(0, product.qty + delta)
-    await updateDoc(doc(db, COLLECTION, product.id), { qty: newQty, updatedAt: serverTimestamp() })
+    const updates = { qty: newQty, updatedAt: serverTimestamp() }
+    if (delta > 0 && product.ordered) {
+      updates.ordered = false
+      updates.orderedDate = null
+    }
+    await updateDoc(doc(db, COLLECTION, product.id), updates)
   }
 
   async function saveProduct(data) {

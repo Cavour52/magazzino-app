@@ -8,19 +8,27 @@ export default function ProductCard({ product, status, onInc, onDec, onEdit }) {
   const meta = statusMeta[status]
   return (
     <div style={styles.card}>
-      <div style={styles.main} onClick={onEdit}>
-        <p style={styles.name}>{product.name}</p>
-        <p style={styles.threshold}>
-          Soglia minima: {product.threshold} {product.unit}
-          {product.supplier ? ` · ${product.supplier}` : ''}
-        </p>
+      <div style={styles.topRow}>
+        <div style={styles.main} onClick={onEdit}>
+          <p style={styles.name}>{product.name}</p>
+          <p style={styles.threshold}>
+            Soglia minima: {product.threshold} {product.unit}
+            {product.supplier ? ` · ${product.supplier}` : ''}
+          </p>
+        </div>
+        <span style={{ ...styles.badge, background: meta.bg, color: meta.fg }}>{meta.label}</span>
+        <div style={styles.qtyControl}>
+          <button style={styles.qtyBtn} onClick={onDec} aria-label="Diminuisci">–</button>
+          <span style={styles.qtyValue}>{product.qty} {product.unit}</span>
+          <button style={styles.qtyBtn} onClick={onInc} aria-label="Aumenta">+</button>
+        </div>
       </div>
-      <span style={{ ...styles.badge, background: meta.bg, color: meta.fg }}>{meta.label}</span>
-      <div style={styles.qtyControl}>
-        <button style={styles.qtyBtn} onClick={onDec} aria-label="Diminuisci">–</button>
-        <span style={styles.qtyValue}>{product.qty} {product.unit}</span>
-        <button style={styles.qtyBtn} onClick={onInc} aria-label="Aumenta">+</button>
-      </div>
+      {product.ordered && (
+        <div style={styles.orderedBadge}>
+          <span style={styles.orderedDot} />
+          Ordinato{product.orderedDate ? ` il ${new Date(product.orderedDate).toLocaleDateString('it-IT')}` : ''}
+        </div>
+      )}
     </div>
   )
 }
@@ -28,12 +36,17 @@ export default function ProductCard({ product, status, onInc, onDec, onEdit }) {
 const styles = {
   card: {
     display: 'flex',
-    alignItems: 'center',
-    gap: 12,
+    flexDirection: 'column',
+    gap: 8,
     background: 'var(--card)',
     border: '1px solid var(--line)',
     borderRadius: 'var(--radius-md)',
     padding: '12px 14px',
+  },
+  topRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
   },
   main: {
     flex: 1,
@@ -86,5 +99,24 @@ const styles = {
     fontWeight: 600,
     minWidth: 52,
     textAlign: 'center',
+  },
+  orderedBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#1D5C8A',
+    background: '#E2EEF7',
+    borderRadius: 999,
+    padding: '4px 10px',
+    width: 'fit-content',
+  },
+  orderedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: '50%',
+    background: '#1D5C8A',
+    flexShrink: 0,
   },
 }
