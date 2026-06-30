@@ -2,10 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Chiunque sia autenticato (anche in modo anonimo, come fa l'app)
-    // puo' leggere e scrivere i prodotti del magazzino.
+    // puo' leggere e scrivere i prodotti del magazzino e la lista fornitori.
     // Sufficiente per un uso a 3 persone fidate; per maggiore sicurezza
     // in futuro si puo' passare ad autenticazione con email/password.
     match /prodotti/{prodottoId} {
+      allow read, write: if request.auth != null;
+    }
+    match /config/{docId} {
       allow read, write: if request.auth != null;
     }
   }
