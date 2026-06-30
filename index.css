@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #1C2521;
+  --ink-soft: #4A564F;
+  --ink-faint: #8B968F;
+  --paper: #F7F5EF;
+  --card: #FFFFFF;
+  --line: #E3E0D6;
+  --moss: #2F5D4F;
+  --moss-deep: #1E3F35;
+  --moss-pale: #E3ECE7;
+  --amber: #C77F1E;
+  --amber-pale: #FBEDDA;
+  --rust: #B14B3A;
+  --rust-pale: #F8E4E0;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .display {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, select {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--moss-pale);
+}
