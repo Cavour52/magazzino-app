@@ -1,10 +1,31 @@
 import { useState } from 'react'
 
-export default function ProductModal({ initial, onSave, onDelete, onClose }) {
+export default function ProductModal({ initial, suppliers = [], onAddSupplier, onSave, onDelete, onClose }) {
   const [name, setName] = useState(initial?.name || '')
   const [qty, setQty] = useState(initial?.qty ?? 0)
   const [threshold, setThreshold] = useState(initial?.threshold ?? 2)
   const [unit, setUnit] = useState(initial?.unit || 'pz')
+  const [supplier, setSupplier] = useState(initial?.supplier || '')
+  const [addingSupplier, setAddingSupplier] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
+
+  function handleSupplierChange(e) {
+    const value = e.target.value
+    if (value === '__add_new__') {
+      setAddingSupplier(true)
+    } else {
+      setSupplier(value)
+    }
+  }
+
+  async function confirmNewSupplier() {
+    const trimmed = newSupplierName.trim()
+    if (!trimmed) return
+    if (onAddSupplier) await onAddSupplier(trimmed)
+    setSupplier(trimmed)
+    setNewSupplierName('')
+    setAddingSupplier(false)
+  }
 
   function handleSave() {
     if (!name.trim()) return
@@ -13,6 +34,7 @@ export default function ProductModal({ initial, onSave, onDelete, onClose }) {
       qty: Math.max(0, parseInt(qty) || 0),
       threshold: Math.max(0, parseInt(threshold) || 0),
       unit: unit.trim() || 'pz',
+      supplier: supplier || '',
     })
   }
 
@@ -37,6 +59,29 @@ export default function ProductModal({ initial, onSave, onDelete, onClose }) {
 
         <label style={styles.label}>Unità</label>
         <input style={styles.input} value={unit} onChange={e => setUnit(e.target.value)} placeholder="pz, kg, lt…" />
+
+        <label style={styles.label}>Fornitore</label>
+        {!addingSupplier ? (
+          <select style={styles.input} value={supplier} onChange={handleSupplierChange}>
+            <option value="">Nessuno</option>
+            {suppliers.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+            <option value="__add_new__">+ Aggiungi nuovo fornitore</option>
+          </select>
+        ) : (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              style={{ ...styles.input, flex: 1 }}
+              value={newSupplierName}
+              onChange={e => setNewSupplierName(e.target.value)}
+              placeholder="Nome nuovo fornitore"
+              autoFocus
+            />
+            <button style={styles.cancelBtn} onClick={() => { setAddingSupplier(false); setNewSupplierName('') }}>Annulla</button>
+            <button style={styles.saveBtn} onClick={confirmNewSupplier}>Aggiungi</button>
+          </div>
+        )}
 
         <div style={styles.actions}>
           {onDelete && (

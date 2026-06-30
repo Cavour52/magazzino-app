@@ -1,18 +1,22 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
-  collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
+  collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp,
+  setDoc
 } from 'firebase/firestore'
 import { db, auth, ensureSignedIn } from './firebase'
 import ProductCard from './ProductCard'
 import ProductModal from './ProductModal'
 
 const COLLECTION = 'prodotti'
+const DEFAULT_SUPPLIERS = ['RESS MULTISERVICE', 'RM MANOLO', 'METTIFOGO', 'CHIRONI']
 
 export default function App() {
   const [ready, setReady] = useState(false)
   const [products, setProducts] = useState([])
+  const [suppliers, setSuppliers] = useState(DEFAULT_SUPPLIERS)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
+  const [supplierFilter, setSupplierFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [connError, setConnError] = useState(false)
@@ -37,6 +41,26 @@ export default function App() {
     return () => unsub()
   }, [ready])
 
+  useEffect(() => {
+    if (!ready) return
+    const ref = doc(db, 'config', 'fornitori')
+    const unsub = onSnapshot(ref, async (snap) => {
+      if (snap.exists() && Array.isArray(snap.data().lista)) {
+        setSuppliers(snap.data().lista)
+      } else {
+        await setDoc(ref, { lista: DEFAULT_SUPPLIERS })
+      }
+    })
+    return () => unsub()
+  }, [ready])
+
+  async function addSupplier(name) {
+    const trimmed = name.trim()
+    if (!trimmed || suppliers.includes(trimmed)) return
+    const updated = [...suppliers, trimmed]
+    await setDoc(doc(db, 'config', 'fornitori'), { lista: updated })
+  }
+
   const statusOf = (p) => {
     if (p.qty <= 0) return 'out'
     if (p.qty <= p.threshold) return 'low'
@@ -46,12 +70,13 @@ export default function App() {
   const filtered = useMemo(() => {
     let list = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
     if (filter !== 'all') list = list.filter(p => statusOf(p) === filter)
+    if (supplierFilter !== 'all') list = list.filter(p => p.supplier === supplierFilter)
     return list.sort((a, b) => {
       const rank = s => s === 'out' ? 0 : s === 'low' ? 1 : 2
       const r = rank(statusOf(a)) - rank(statusOf(b))
       return r !== 0 ? r : a.name.localeCompare(b.name)
     })
-  }, [products, query, filter])
+  }, [products, query, filter, supplierFilter])
 
   const counts = useMemo(() => ({
     total: products.length,
@@ -140,6 +165,12 @@ export default function App() {
           <option value="low">In esaurimento</option>
           <option value="out">Esauriti</option>
         </select>
+        <select style={styles.select} value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)}>
+          <option value="all">Tutti i fornitori</option>
+          {suppliers.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
       </div>
 
       <div style={styles.list}>
@@ -167,6 +198,8 @@ export default function App() {
       {modalOpen && (
         <ProductModal
           initial={editing}
+          suppliers={suppliers}
+          onAddSupplier={addSupplier}
           onSave={saveProduct}
           onDelete={editing ? () => removeProduct(editing.id) : null}
           onClose={() => { setModalOpen(false); setEditing(null) }}

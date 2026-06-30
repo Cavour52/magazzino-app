@@ -10,7 +10,10 @@ export default function ProductCard({ product, status, onInc, onDec, onEdit }) {
     <div style={styles.card}>
       <div style={styles.main} onClick={onEdit}>
         <p style={styles.name}>{product.name}</p>
-        <p style={styles.threshold}>Soglia minima: {product.threshold} {product.unit}</p>
+        <p style={styles.threshold}>
+          Soglia minima: {product.threshold} {product.unit}
+          {product.supplier ? ` · ${product.supplier}` : ''}
+        </p>
       </div>
       <span style={{ ...styles.badge, background: meta.bg, color: meta.fg }}>{meta.label}</span>
       <div style={styles.qtyControl}>
