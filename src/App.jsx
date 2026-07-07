@@ -169,9 +169,9 @@ export default function App() {
       )}
 
       <div style={styles.statRow}>
-        <Stat label="Prodotti" value={counts.total} tone="ink" />
-        <Stat label="In esaurimento" value={counts.low} tone="amber" />
-        <Stat label="Esauriti" value={counts.out} tone="rust" />
+        <Stat label="Prodotti" value={counts.total} tone="ink" active={filter === 'all'} onClick={() => setFilter('all')} />
+        <Stat label="In esaurimento" value={counts.low} tone="amber" active={filter === 'low'} onClick={() => setFilter(filter === 'low' ? 'all' : 'low')} />
+        <Stat label="Esauriti" value={counts.out} tone="rust" active={filter === 'out'} onClick={() => setFilter(filter === 'out' ? 'all' : 'out')} />
       </div>
 
       {critical.length > 0 && (
@@ -249,7 +249,7 @@ export default function App() {
   )
 }
 
-function Stat({ label, value, tone }) {
+function Stat({ label, value, tone, active = false, onClick }) {
   const toneColors = {
     ink: { bg: 'var(--card)', fg: 'var(--ink)' },
     amber: { bg: 'var(--amber-pale)', fg: 'var(--amber)' },
@@ -257,7 +257,16 @@ function Stat({ label, value, tone }) {
   }
   const c = toneColors[tone]
   return (
-    <div style={{ ...styles.statCard, background: c.bg, border: tone === 'ink' ? '1px solid var(--line)' : 'none' }}>
+    <div
+      onClick={onClick}
+      style={{
+        ...styles.statCard,
+        background: c.bg,
+        border: tone === 'ink' ? '1px solid var(--line)' : '1px solid transparent',
+        cursor: 'pointer',
+        outline: active && tone !== 'ink' ? `2px solid ${c.fg}` : 'none',
+      }}
+    >
       <p style={{ ...styles.statLabel, color: tone === 'ink' ? 'var(--ink-faint)' : c.fg }}>{label}</p>
       <p style={{ ...styles.statValue, color: c.fg }}>{value}</p>
     </div>
