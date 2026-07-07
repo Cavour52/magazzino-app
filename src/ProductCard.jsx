@@ -4,7 +4,7 @@ const statusMeta = {
   out: { label: 'Esaurito', fg: '#B14B3A', bg: '#F8E4E0' },
 }
 
-export default function ProductCard({ product, status, onInc, onDec, onEdit }) {
+export default function ProductCard({ product, status, showWarehouse = false, warehouseName = '', onInc, onDec, onEdit }) {
   const meta = statusMeta[status]
   return (
     <div style={styles.card}>
@@ -23,10 +23,17 @@ export default function ProductCard({ product, status, onInc, onDec, onEdit }) {
           <button style={styles.qtyBtn} onClick={onInc} aria-label="Aumenta">+</button>
         </div>
       </div>
-      {product.ordered && (
-        <div style={styles.orderedBadge}>
-          <span style={styles.orderedDot} />
-          Ordinato{product.orderedDate ? ` il ${new Date(product.orderedDate).toLocaleDateString('it-IT')}` : ''}
+      {(product.ordered || showWarehouse) && (
+        <div style={styles.bottomRow}>
+          {showWarehouse && warehouseName && (
+            <div style={styles.warehouseBadge}>{warehouseName}</div>
+          )}
+          {product.ordered && (
+            <div style={styles.orderedBadge}>
+              <span style={styles.orderedDot} />
+              Ordinato{product.orderedDate ? ` il ${new Date(product.orderedDate).toLocaleDateString('it-IT')}` : ''}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -107,6 +114,21 @@ const styles = {
     fontWeight: 500,
     color: '#1D5C8A',
     background: '#E2EEF7',
+    borderRadius: 999,
+    padding: '4px 10px',
+    width: 'fit-content',
+  },
+  bottomRow: {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  warehouseBadge: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: 'var(--ink-soft)',
+    background: 'var(--paper)',
+    border: '1px solid var(--line)',
     borderRadius: 999,
     padding: '4px 10px',
     width: 'fit-content',

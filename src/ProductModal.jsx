@@ -1,11 +1,12 @@
 import { useState } from 'react'
 
-export default function ProductModal({ initial, suppliers = [], onAddSupplier, onSave, onDelete, onClose }) {
+export default function ProductModal({ initial, suppliers = [], warehouses = [], defaultWarehouse = 'Enoteca', onAddSupplier, onSave, onDelete, onClose }) {
   const [name, setName] = useState(initial?.name || '')
   const [qty, setQty] = useState(initial?.qty ?? 0)
   const [threshold, setThreshold] = useState(initial?.threshold ?? 2)
   const [unit, setUnit] = useState(initial?.unit || 'pz')
   const [supplier, setSupplier] = useState(initial?.supplier || '')
+  const [warehouse, setWarehouse] = useState(initial?.warehouse || defaultWarehouse)
   const [addingSupplier, setAddingSupplier] = useState(false)
   const [newSupplierName, setNewSupplierName] = useState('')
   const [ordered, setOrdered] = useState(initial?.ordered || false)
@@ -48,6 +49,7 @@ export default function ProductModal({ initial, suppliers = [], onAddSupplier, o
       threshold: Math.max(0, parseInt(threshold) || 0),
       unit: unit.trim() || 'pz',
       supplier: supplier || '',
+      warehouse: warehouse || defaultWarehouse,
       ordered: ordered,
       orderedDate: ordered ? orderedDate : null,
     })
@@ -74,6 +76,13 @@ export default function ProductModal({ initial, suppliers = [], onAddSupplier, o
 
         <label style={styles.label}>Unità</label>
         <input style={styles.input} value={unit} onChange={e => setUnit(e.target.value)} placeholder="pz, kg, lt…" />
+
+        <label style={styles.label}>Magazzino</label>
+        <select style={styles.input} value={warehouse} onChange={e => setWarehouse(e.target.value)}>
+          {warehouses.map(w => (
+            <option key={w} value={w}>{w}</option>
+          ))}
+        </select>
 
         <label style={styles.label}>Fornitore</label>
         {!addingSupplier ? (

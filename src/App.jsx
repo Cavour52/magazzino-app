@@ -9,11 +9,14 @@ import ProductModal from './ProductModal'
 
 const COLLECTION = 'prodotti'
 const DEFAULT_SUPPLIERS = ['RESS MULTISERVICE', 'RM MANOLO', 'METTIFOGO', 'CHIRONI']
+const WAREHOUSES = ['Enoteca', 'Cavour']
+const DEFAULT_WAREHOUSE = 'Enoteca'
 
 export default function App() {
   const [ready, setReady] = useState(false)
   const [products, setProducts] = useState([])
   const [suppliers, setSuppliers] = useState(DEFAULT_SUPPLIERS)
+  const [warehouse, setWarehouse] = useState('Enoteca')
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
   const [supplierFilter, setSupplierFilter] = useState('all')
@@ -67,8 +70,15 @@ export default function App() {
     return 'ok'
   }
 
+  const warehouseOf = (p) => p.warehouse || DEFAULT_WAREHOUSE
+
+  const inWarehouse = useMemo(() => {
+    if (warehouse === 'all') return products
+    return products.filter(p => warehouseOf(p) === warehouse)
+  }, [products, warehouse])
+
   const filtered = useMemo(() => {
-    let list = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
+    let list = inWarehouse.filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
     if (filter !== 'all') list = list.filter(p => statusOf(p) === filter)
     if (supplierFilter !== 'all') list = list.filter(p => p.supplier === supplierFilter)
     return list.sort((a, b) => {
@@ -76,15 +86,15 @@ export default function App() {
       const r = rank(statusOf(a)) - rank(statusOf(b))
       return r !== 0 ? r : a.name.localeCompare(b.name)
     })
-  }, [products, query, filter, supplierFilter])
+  }, [inWarehouse, query, filter, supplierFilter])
 
   const counts = useMemo(() => ({
-    total: products.length,
-    low: products.filter(p => statusOf(p) === 'low').length,
-    out: products.filter(p => statusOf(p) === 'out').length,
-  }), [products])
+    total: inWarehouse.length,
+    low: inWarehouse.filter(p => statusOf(p) === 'low').length,
+    out: inWarehouse.filter(p => statusOf(p) === 'out').length,
+  }), [inWarehouse])
 
-  const critical = products.filter(p => statusOf(p) !== 'ok')
+  const critical = inWarehouse.filter(p => statusOf(p) !== 'ok')
 
   async function changeQty(product, delta) {
     const newQty = Math.max(0, product.qty + delta)
@@ -127,12 +137,30 @@ export default function App() {
       <header style={styles.header}>
         <div>
           <p style={styles.eyebrow}>Scorte in tempo reale</p>
-          <h1 style={styles.title}>Magazzino</h1>
+          <h1 style={styles.title}>{warehouse === 'all' ? 'Tutti i magazzini' : warehouse}</h1>
         </div>
         <button style={styles.addBtn} onClick={() => { setEditing(null); setModalOpen(true) }}>
           + Prodotto
         </button>
       </header>
+
+      <div style={styles.warehouseTabs}>
+        {WAREHOUSES.map(w => (
+          <button
+            key={w}
+            style={{ ...styles.warehouseTab, ...(warehouse === w ? styles.warehouseTabActive : {}) }}
+            onClick={() => setWarehouse(w)}
+          >
+            {w}
+          </button>
+        ))}
+        <button
+          style={{ ...styles.warehouseTab, ...(warehouse === 'all' ? styles.warehouseTabActive : {}) }}
+          onClick={() => setWarehouse('all')}
+        >
+          Tutti
+        </button>
+      </div>
 
       {connError && (
         <div style={styles.errorBanner}>
@@ -196,6 +224,8 @@ export default function App() {
             key={p.id}
             product={p}
             status={statusOf(p)}
+            showWarehouse={warehouse === 'all'}
+            warehouseName={warehouseOf(p)}
             onInc={() => changeQty(p, 1)}
             onDec={() => changeQty(p, -1)}
             onEdit={() => { setEditing(p); setModalOpen(true) }}
@@ -207,6 +237,8 @@ export default function App() {
         <ProductModal
           initial={editing}
           suppliers={suppliers}
+          warehouses={WAREHOUSES}
+          defaultWarehouse={warehouse === 'all' ? DEFAULT_WAREHOUSE : warehouse}
           onAddSupplier={addSupplier}
           onSave={saveProduct}
           onDelete={editing ? () => removeProduct(editing.id) : null}
@@ -283,6 +315,31 @@ const styles = {
     padding: '12px 14px',
     fontSize: 13,
     marginBottom: 16,
+  },
+  warehouseTabs: {
+    display: 'flex',
+    gap: 6,
+    marginBottom: 18,
+    background: 'var(--card)',
+    border: '1px solid var(--line)',
+    borderRadius: 'var(--radius-md)',
+    padding: 4,
+  },
+  warehouseTab: {
+    flex: 1,
+    border: 'none',
+    background: 'transparent',
+    borderRadius: 10,
+    padding: '9px 8px',
+    fontSize: 14,
+    fontWeight: 500,
+    color: 'var(--ink-soft)',
+    minWidth: 0,
+  },
+  warehouseTabActive: {
+    background: 'var(--moss-deep)',
+    color: '#FFF',
+    fontWeight: 600,
   },
   statRow: {
     display: 'grid',
