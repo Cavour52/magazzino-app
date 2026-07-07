@@ -94,8 +94,6 @@ export default function App() {
     out: inWarehouse.filter(p => statusOf(p) === 'out').length,
   }), [inWarehouse])
 
-  const critical = inWarehouse.filter(p => statusOf(p) !== 'ok')
-
   async function changeQty(product, delta) {
     const newQty = Math.max(0, product.qty + delta)
     const updates = { qty: newQty, updatedAt: serverTimestamp() }
@@ -173,17 +171,6 @@ export default function App() {
         <Stat label="In esaurimento" value={counts.low} tone="amber" active={filter === 'low'} onClick={() => setFilter(filter === 'low' ? 'all' : 'low')} />
         <Stat label="Esauriti" value={counts.out} tone="rust" active={filter === 'out'} onClick={() => setFilter(filter === 'out' ? 'all' : 'out')} />
       </div>
-
-      {critical.length > 0 && (
-        <div style={styles.alertBanner}>
-          <span style={styles.alertDot} />
-          <span>
-            {critical.slice(0, 3).map(p => p.name).join(', ')}
-            {critical.length > 3 ? ` e altri ${critical.length - 3}` : ''}
-            {critical.length === 1 ? ' sta per finire.' : ' stanno per finire o sono esauriti.'}
-          </span>
-        </div>
-      )}
 
       <div style={styles.controls}>
         <input
