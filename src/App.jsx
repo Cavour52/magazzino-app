@@ -6,6 +6,7 @@ import {
 import { db, auth, ensureSignedIn } from './firebase'
 import ProductCard from './ProductCard'
 import ProductModal from './ProductModal'
+import OrderModal from './OrderModal'
 
 const COLLECTION = 'prodotti'
 const DEFAULT_SUPPLIERS = ['RESS MULTISERVICE', 'RM MANOLO', 'METTIFOGO', 'CHIRONI']
@@ -21,6 +22,7 @@ export default function App() {
   const [filter, setFilter] = useState('all')
   const [supplierFilter, setSupplierFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
+  const [orderOpen, setOrderOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [connError, setConnError] = useState(false)
 
@@ -137,9 +139,14 @@ export default function App() {
           <p style={styles.eyebrow}>Scorte in tempo reale</p>
           <h1 style={styles.title}>{warehouse === 'all' ? 'Tutti i magazzini' : warehouse}</h1>
         </div>
-        <button style={styles.addBtn} onClick={() => { setEditing(null); setModalOpen(true) }}>
-          + Prodotto
-        </button>
+        <div style={styles.headerBtns}>
+          <button style={styles.orderBtn} onClick={() => setOrderOpen(true)}>
+            Ordina
+          </button>
+          <button style={styles.addBtn} onClick={() => { setEditing(null); setModalOpen(true) }}>
+            + Prodotto
+          </button>
+        </div>
       </header>
 
       <div style={styles.warehouseTabs}>
@@ -219,6 +226,13 @@ export default function App() {
           />
         ))}
       </div>
+
+      {orderOpen && (
+        <OrderModal
+          products={inWarehouse}
+          onClose={() => setOrderOpen(false)}
+        />
+      )}
 
       {modalOpen && (
         <ProductModal
@@ -301,6 +315,20 @@ const styles = {
     border: 'none',
     borderRadius: 'var(--radius-sm)',
     padding: '11px 16px',
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  headerBtns: {
+    display: 'flex',
+    gap: 8,
+    alignItems: 'center',
+  },
+  orderBtn: {
+    background: 'var(--card)',
+    color: 'var(--moss-deep)',
+    border: '1.5px solid var(--moss-deep)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '10px 14px',
     fontSize: 14,
     fontWeight: 600,
   },
