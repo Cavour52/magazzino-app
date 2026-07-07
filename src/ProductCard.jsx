@@ -58,9 +58,8 @@ const styles = {
     fontSize: 15,
     fontWeight: 600,
     color: 'var(--ink)',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
   },
   threshold: {
     margin: 0,
