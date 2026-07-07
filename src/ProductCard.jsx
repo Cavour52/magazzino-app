@@ -15,6 +15,9 @@ export default function ProductCard({ product, status, showWarehouse = false, wa
             Soglia minima: {product.threshold} {product.unit}
             {product.supplier ? ` · ${product.supplier}` : ''}
           </p>
+          {product.note && (
+            <p style={styles.note}>{product.note}</p>
+          )}
         </div>
         <span style={{ ...styles.badge, background: meta.bg, color: meta.fg }}>{meta.label}</span>
         <div style={styles.qtyControl}>
@@ -72,6 +75,13 @@ const styles = {
     margin: 0,
     fontSize: 12.5,
     color: 'var(--ink-faint)',
+  },
+  note: {
+    margin: '2px 0 0',
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: 'var(--ink-soft)',
+    wordBreak: 'break-word',
   },
   badge: {
     fontSize: 11.5,

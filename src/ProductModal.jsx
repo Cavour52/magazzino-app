@@ -12,6 +12,7 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
   const [newSupplierName, setNewSupplierName] = useState('')
   const [ordered, setOrdered] = useState(initial?.ordered || false)
   const [orderedDate, setOrderedDate] = useState(initial?.orderedDate || '')
+  const [note, setNote] = useState(initial?.note || '')
 
   function handleSupplierChange(e) {
     const value = e.target.value
@@ -54,6 +55,7 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
       warehouse: warehouse || defaultWarehouse,
       ordered: ordered,
       orderedDate: ordered ? orderedDate : null,
+      note: note.trim() || '',
     })
   }
 
@@ -116,6 +118,9 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
             <button style={styles.saveBtn} onClick={confirmNewSupplier}>Aggiungi</button>
           </div>
         )}
+
+        <label style={styles.label}>Note</label>
+        <input style={styles.input} value={note} onChange={e => setNote(e.target.value)} placeholder="Es. 1 cartone = 24 pz" />
 
         <div style={styles.orderedRow} onClick={toggleOrdered}>
           <div style={{ ...styles.toggle, background: ordered ? 'var(--moss-deep)' : 'var(--line)' }}>
