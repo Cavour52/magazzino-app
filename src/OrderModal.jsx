@@ -18,7 +18,10 @@ export default function OrderModal({ products, onClose }) {
   }, [products])
 
   function messageFor(supplier, items) {
-    const lines = items.map(p => `- ${p.name}`)
+    const lines = items.map(p => {
+      if (p.reorderQty) return `- ${p.name}: ${p.reorderQty} ${p.unit}`
+      return `- ${p.name}`
+    })
     return `Buongiorno,\nvorremmo ordinare i seguenti prodotti:\n\n${lines.join('\n')}\n\nGrazie`
   }
 
@@ -65,6 +68,7 @@ export default function OrderModal({ products, onClose }) {
                 {items.map(p => (
                   <li key={p.id} style={styles.item}>
                     {p.name}
+                    {p.reorderQty ? <strong style={styles.itemReorder}> → {p.reorderQty} {p.unit}</strong> : null}
                     <span style={styles.itemQty}>
                       {p.qty <= 0 ? 'esaurito' : `${p.qty} ${p.unit} rimasti`}
                     </span>
@@ -165,6 +169,10 @@ const styles = {
     marginLeft: 6,
     fontSize: 12,
     color: 'var(--ink-faint)',
+  },
+  itemReorder: {
+    color: 'var(--moss-deep)',
+    fontWeight: 700,
   },
   btnRow: {
     display: 'flex',

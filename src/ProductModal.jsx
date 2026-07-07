@@ -4,6 +4,7 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
   const [name, setName] = useState(initial?.name || '')
   const [qty, setQty] = useState(initial?.qty ?? 0)
   const [threshold, setThreshold] = useState(initial?.threshold ?? 2)
+  const [reorderQty, setReorderQty] = useState(initial?.reorderQty ?? '')
   const [unit, setUnit] = useState(initial?.unit || 'pz')
   const [supplier, setSupplier] = useState(initial?.supplier || '')
   const [warehouse, setWarehouse] = useState(initial?.warehouse || defaultWarehouse)
@@ -47,6 +48,7 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
       name: name.trim(),
       qty: Math.max(0, parseInt(qty) || 0),
       threshold: Math.max(0, parseInt(threshold) || 0),
+      reorderQty: reorderQty === '' ? null : Math.max(0, parseInt(reorderQty) || 0),
       unit: unit.trim() || 'pz',
       supplier: supplier || '',
       warehouse: warehouse || defaultWarehouse,
@@ -74,8 +76,16 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
           </div>
         </div>
 
-        <label style={styles.label}>Unità</label>
-        <input style={styles.input} value={unit} onChange={e => setUnit(e.target.value)} placeholder="pz, kg, lt…" />
+        <div style={styles.row}>
+          <div style={{ flex: 1 }}>
+            <label style={styles.label}>Unità</label>
+            <input style={styles.input} value={unit} onChange={e => setUnit(e.target.value)} placeholder="pz, kg, lt…" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={styles.label}>Q.tà di riordino</label>
+            <input style={styles.input} type="number" min="0" value={reorderQty} onChange={e => setReorderQty(e.target.value)} placeholder="Es. 12" />
+          </div>
+        </div>
 
         <label style={styles.label}>Magazzino</label>
         <select style={styles.input} value={warehouse} onChange={e => setWarehouse(e.target.value)}>
