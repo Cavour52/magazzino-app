@@ -14,6 +14,7 @@ export default function ProductCard({ product, status, showWarehouse = false, wa
           <p style={styles.threshold}>
             Soglia minima: {product.threshold} {product.unit}
             {product.supplier ? ` · ${product.supplier}` : ''}
+            {product.manager ? ` · Resp: ${product.manager}` : ''}
           </p>
           {product.note && (
             <p style={styles.note}>{product.note}</p>

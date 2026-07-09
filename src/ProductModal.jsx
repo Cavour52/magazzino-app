@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function ProductModal({ initial, suppliers = [], warehouses = [], defaultWarehouse = 'Enoteca', onAddSupplier, onSave, onDelete, onClose }) {
+export default function ProductModal({ initial, suppliers = [], managers = [], warehouses = [], defaultWarehouse = 'Enoteca', onAddSupplier, onAddManager, onSave, onDelete, onClose }) {
   const [name, setName] = useState(initial?.name || '')
   const [qty, setQty] = useState(initial?.qty ?? 0)
   const [threshold, setThreshold] = useState(initial?.threshold ?? 2)
@@ -13,6 +13,27 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
   const [ordered, setOrdered] = useState(initial?.ordered || false)
   const [orderedDate, setOrderedDate] = useState(initial?.orderedDate || '')
   const [note, setNote] = useState(initial?.note || '')
+  const [manager, setManager] = useState(initial?.manager || '')
+  const [addingManager, setAddingManager] = useState(false)
+  const [newManagerName, setNewManagerName] = useState('')
+
+  function handleManagerChange(e) {
+    const value = e.target.value
+    if (value === '__add_new__') {
+      setAddingManager(true)
+    } else {
+      setManager(value)
+    }
+  }
+
+  async function confirmNewManager() {
+    const trimmed = newManagerName.trim()
+    if (!trimmed) return
+    if (onAddManager) await onAddManager(trimmed)
+    setManager(trimmed)
+    setNewManagerName('')
+    setAddingManager(false)
+  }
 
   function handleSupplierChange(e) {
     const value = e.target.value
@@ -56,6 +77,7 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
       ordered: ordered,
       orderedDate: ordered ? orderedDate : null,
       note: note.trim() || '',
+      manager: manager || '',
     })
   }
 
@@ -116,6 +138,29 @@ export default function ProductModal({ initial, suppliers = [], warehouses = [],
             />
             <button style={styles.cancelBtn} onClick={() => { setAddingSupplier(false); setNewSupplierName('') }}>Annulla</button>
             <button style={styles.saveBtn} onClick={confirmNewSupplier}>Aggiungi</button>
+          </div>
+        )}
+
+        <label style={styles.label}>Responsabile</label>
+        {!addingManager ? (
+          <select style={styles.input} value={manager} onChange={handleManagerChange}>
+            <option value="">Nessuno</option>
+            {managers.map(m => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+            <option value="__add_new__">+ Aggiungi nuovo responsabile</option>
+          </select>
+        ) : (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              style={{ ...styles.input, flex: 1 }}
+              value={newManagerName}
+              onChange={e => setNewManagerName(e.target.value)}
+              placeholder="Nome responsabile"
+              autoFocus
+            />
+            <button style={styles.cancelBtn} onClick={() => { setAddingManager(false); setNewManagerName('') }}>Annulla</button>
+            <button style={styles.saveBtn} onClick={confirmNewManager}>Aggiungi</button>
           </div>
         )}
 

@@ -17,6 +17,7 @@ export default function App() {
   const [ready, setReady] = useState(false)
   const [products, setProducts] = useState([])
   const [suppliers, setSuppliers] = useState(DEFAULT_SUPPLIERS)
+  const [managers, setManagers] = useState([])
   const [warehouse, setWarehouse] = useState('Enoteca')
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
@@ -64,6 +65,24 @@ export default function App() {
     if (!trimmed || suppliers.includes(trimmed)) return
     const updated = [...suppliers, trimmed]
     await setDoc(doc(db, 'config', 'fornitori'), { lista: updated })
+  }
+
+  useEffect(() => {
+    if (!ready) return
+    const ref = doc(db, 'config', 'responsabili')
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists() && Array.isArray(snap.data().lista)) {
+        setManagers(snap.data().lista)
+      }
+    })
+    return () => unsub()
+  }, [ready])
+
+  async function addManager(name) {
+    const trimmed = name.trim()
+    if (!trimmed || managers.includes(trimmed)) return
+    const updated = [...managers, trimmed]
+    await setDoc(doc(db, 'config', 'responsabili'), { lista: updated })
   }
 
   const statusOf = (p) => {
@@ -238,9 +257,11 @@ export default function App() {
         <ProductModal
           initial={editing}
           suppliers={suppliers}
+          managers={managers}
           warehouses={WAREHOUSES}
           defaultWarehouse={warehouse === 'all' ? DEFAULT_WAREHOUSE : warehouse}
           onAddSupplier={addSupplier}
+          onAddManager={addManager}
           onSave={saveProduct}
           onDelete={editing ? () => removeProduct(editing.id) : null}
           onClose={() => { setModalOpen(false); setEditing(null) }}
