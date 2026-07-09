@@ -4,7 +4,7 @@ const statusMeta = {
   out: { label: 'Esaurito', fg: '#B14B3A', bg: '#F8E4E0' },
 }
 
-export default function ProductCard({ product, status, showWarehouse = false, warehouseName = '', onInc, onDec, onEdit }) {
+export default function ProductCard({ product, status, showWarehouse = false, warehouseName = '', onInc, onDec, onEdit, onHistory }) {
   const meta = statusMeta[status]
   return (
     <div style={styles.card}>
@@ -27,19 +27,18 @@ export default function ProductCard({ product, status, showWarehouse = false, wa
           <button style={styles.qtyBtn} onClick={onInc} aria-label="Aumenta">+</button>
         </div>
       </div>
-      {(product.ordered || showWarehouse) && (
-        <div style={styles.bottomRow}>
-          {showWarehouse && warehouseName && (
-            <div style={styles.warehouseBadge}>{warehouseName}</div>
-          )}
-          {product.ordered && (
-            <div style={styles.orderedBadge}>
-              <span style={styles.orderedDot} />
-              Ordinato{product.orderedDate ? ` il ${new Date(product.orderedDate).toLocaleDateString('it-IT')}` : ''}
-            </div>
-          )}
-        </div>
-      )}
+      <div style={styles.bottomRow}>
+        {showWarehouse && warehouseName && (
+          <div style={styles.warehouseBadge}>{warehouseName}</div>
+        )}
+        {product.ordered && (
+          <div style={styles.orderedBadge}>
+            <span style={styles.orderedDot} />
+            Ordinato{product.orderedDate ? ` il ${new Date(product.orderedDate).toLocaleDateString('it-IT')}` : ''}
+          </div>
+        )}
+        <button style={styles.historyBtn} onClick={onHistory}>Storico</button>
+      </div>
     </div>
   )
 }
@@ -133,6 +132,18 @@ const styles = {
     display: 'flex',
     gap: 6,
     flexWrap: 'wrap',
+    alignItems: 'center',
+  },
+  historyBtn: {
+    marginLeft: 'auto',
+    border: '1px solid var(--line)',
+    background: 'transparent',
+    borderRadius: 999,
+    padding: '4px 12px',
+    fontSize: 12,
+    fontWeight: 600,
+    color: 'var(--ink-soft)',
+    cursor: 'pointer',
   },
   warehouseBadge: {
     fontSize: 12,

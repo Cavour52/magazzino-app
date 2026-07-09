@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp,
   setDoc
@@ -7,6 +7,7 @@ import { db, auth, ensureSignedIn } from './firebase'
 import ProductCard from './ProductCard'
 import ProductModal from './ProductModal'
 import OrderModal from './OrderModal'
+import HistoryModal from './HistoryModal'
 
 const COLLECTION = 'prodotti'
 const DEFAULT_SUPPLIERS = ['RESS MULTISERVICE', 'RM MANOLO', 'METTIFOGO', 'CHIRONI']
@@ -24,12 +25,36 @@ export default function App() {
   const [supplierFilter, setSupplierFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [orderOpen, setOrderOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyProduct, setHistoryProduct] = useState(null)
+  const [currentUser, setCurrentUser] = useState('')
+  const [askUser, setAskUser] = useState(false)
   const [editing, setEditing] = useState(null)
   const [connError, setConnError] = useState(false)
+
+  // Raggruppamento movimenti: accumula i +/- ravvicinati per prodotto
+  const pendingMoves = useRef({})
+  const moveTimers = useRef({})
 
   useEffect(() => {
     ensureSignedIn(() => setReady(true))
   }, [])
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('magazzino-utente')
+      if (saved) setCurrentUser(saved)
+      else setAskUser(true)
+    } catch (e) {
+      setAskUser(true)
+    }
+  }, [])
+
+  function chooseUser(name) {
+    setCurrentUser(name)
+    try { localStorage.setItem('magazzino-utente', name) } catch (e) {}
+    setAskUser(false)
+  }
 
   useEffect(() => {
     if (!ready) return
@@ -119,6 +144,40 @@ export default function App() {
       updates.orderedDate = null
     }
     await updateDoc(doc(db, COLLECTION, product.id), updates)
+
+    // Accumula la variazione per registrarla raggruppata dopo una breve pausa
+    const realDelta = newQty - product.qty
+    if (realDelta !== 0) {
+      const id = product.id
+      pendingMoves.current[id] = {
+        delta: (pendingMoves.current[id]?.delta || 0) + realDelta,
+        name: product.name,
+        unit: product.unit || 'pz',
+        warehouse: warehouseOf(product),
+      }
+      if (moveTimers.current[id]) clearTimeout(moveTimers.current[id])
+      moveTimers.current[id] = setTimeout(() => flushMove(id), 2500)
+    }
+  }
+
+  async function flushMove(id) {
+    const move = pendingMoves.current[id]
+    delete pendingMoves.current[id]
+    delete moveTimers.current[id]
+    if (!move || move.delta === 0) return
+    try {
+      await addDoc(collection(db, 'movimenti'), {
+        productId: id,
+        productName: move.name,
+        delta: move.delta,
+        unit: move.unit,
+        warehouse: move.warehouse,
+        user: currentUser || 'Sconosciuto',
+        createdAt: serverTimestamp(),
+      })
+    } catch (e) {
+      console.error('Errore salvataggio movimento', e)
+    }
   }
 
   async function saveProduct(data) {
@@ -155,6 +214,9 @@ export default function App() {
           <h1 style={styles.title}>{warehouse === 'all' ? 'Tutti i magazzini' : warehouse}</h1>
         </div>
         <div style={styles.headerBtns}>
+          <button style={styles.orderBtn} onClick={() => { setHistoryProduct(null); setHistoryOpen(true) }}>
+            Storico
+          </button>
           <button style={styles.orderBtn} onClick={() => setOrderOpen(true)}>
             Ordina
           </button>
@@ -185,6 +247,13 @@ export default function App() {
       {connError && (
         <div style={styles.errorBanner}>
           Connessione al database non riuscita. Controlla la configurazione Firebase in src/firebase.js.
+        </div>
+      )}
+
+      {currentUser && (
+        <div style={styles.userBar}>
+          Operatore: <strong>{currentUser}</strong>
+          <button style={styles.changeUserBtn} onClick={() => setAskUser(true)}>Cambia</button>
         </div>
       )}
 
@@ -238,6 +307,7 @@ export default function App() {
             onInc={() => changeQty(p, 1)}
             onDec={() => changeQty(p, -1)}
             onEdit={() => { setEditing(p); setModalOpen(true) }}
+            onHistory={() => { setHistoryProduct(p); setHistoryOpen(true) }}
           />
         ))}
       </div>
@@ -247,6 +317,34 @@ export default function App() {
           products={inWarehouse}
           onClose={() => setOrderOpen(false)}
         />
+      )}
+
+      {historyOpen && (
+        <HistoryModal
+          product={historyProduct}
+          onClose={() => { setHistoryOpen(false); setHistoryProduct(null) }}
+        />
+      )}
+
+      {askUser && (
+        <div style={styles.overlay}>
+          <div style={styles.userModal}>
+            <h3 style={{ margin: '0 0 6px', fontSize: 19, fontFamily: 'Fraunces, serif' }}>Chi sei?</h3>
+            <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--ink-faint)' }}>
+              Serve a registrare chi aggiorna le scorte. Puoi cambiarlo quando vuoi.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {managers.length === 0 && (
+                <p style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
+                  Nessun responsabile ancora inserito. Aggiungine uno da un prodotto (campo Responsabile), poi torna qui.
+                </p>
+              )}
+              {managers.map(m => (
+                <button key={m} style={styles.userChoice} onClick={() => chooseUser(m)}>{m}</button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {modalOpen && (
@@ -339,6 +437,53 @@ const styles = {
     display: 'flex',
     gap: 8,
     alignItems: 'center',
+  },
+  userBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    fontSize: 13,
+    color: 'var(--ink-soft)',
+    marginBottom: 14,
+  },
+  changeUserBtn: {
+    border: '1px solid var(--line)',
+    background: 'var(--card)',
+    borderRadius: 8,
+    padding: '4px 10px',
+    fontSize: 12,
+    color: 'var(--moss-deep)',
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(28, 37, 33, 0.45)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    zIndex: 60,
+  },
+  userModal: {
+    background: '#FFF',
+    borderRadius: 'var(--radius-lg)',
+    padding: '22px 20px',
+    width: '100%',
+    maxWidth: 360,
+    boxSizing: 'border-box',
+  },
+  userChoice: {
+    border: '1px solid var(--line)',
+    background: 'var(--paper)',
+    borderRadius: 10,
+    padding: '12px 14px',
+    fontSize: 15,
+    fontWeight: 600,
+    color: 'var(--ink)',
+    cursor: 'pointer',
+    textAlign: 'left',
   },
   orderBtn: {
     background: 'var(--card)',
