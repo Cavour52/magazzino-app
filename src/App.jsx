@@ -102,11 +102,7 @@ export default function App() {
     let list = inWarehouse.filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
     if (filter !== 'all') list = list.filter(p => statusOf(p) === filter)
     if (supplierFilter !== 'all') list = list.filter(p => p.supplier === supplierFilter)
-    return list.sort((a, b) => {
-      const rank = s => s === 'out' ? 0 : s === 'low' ? 1 : 2
-      const r = rank(statusOf(a)) - rank(statusOf(b))
-      return r !== 0 ? r : a.name.localeCompare(b.name)
-    })
+    return list.sort((a, b) => a.name.localeCompare(b.name, 'it', { sensitivity: 'base' }))
   }, [inWarehouse, query, filter, supplierFilter])
 
   const counts = useMemo(() => ({
