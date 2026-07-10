@@ -242,7 +242,7 @@ export default function App() {
           style={{ ...styles.warehouseTab, ...(warehouse === 'all' ? styles.warehouseTabActive : {}) }}
           onClick={() => setWarehouse('all')}
         >
-          Tutti
+          Tutti i magazzini
         </button>
       </div>
 
