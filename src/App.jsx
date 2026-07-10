@@ -215,18 +215,19 @@ export default function App() {
           <p style={styles.eyebrow}>Scorte in tempo reale</p>
           <h1 style={styles.title}>{warehouse === 'all' ? 'Tutti i magazzini' : warehouse}</h1>
         </div>
-        <div style={styles.headerBtns}>
-          <button style={styles.orderBtn} onClick={() => { setHistoryProduct(null); setHistoryOpen(true) }}>
-            Storico
-          </button>
-          <button style={styles.orderBtn} onClick={() => setOrderOpen(true)}>
-            Ordina
-          </button>
-          <button style={styles.addBtn} onClick={() => { setEditing(null); setModalOpen(true) }}>
-            + Prodotto
-          </button>
-        </div>
       </header>
+
+      <div style={styles.headerBtns}>
+        <button style={styles.headerBtn} onClick={() => { setHistoryProduct(null); setHistoryOpen(true) }}>
+          Storico
+        </button>
+        <button style={styles.headerBtn} onClick={() => setOrderOpen(true)}>
+          Ordina
+        </button>
+        <button style={styles.headerBtnPrimary} onClick={() => { setEditing(null); setModalOpen(true) }}>
+          + Prodotto
+        </button>
+      </div>
 
       <div style={styles.warehouseTabs}>
         {WAREHOUSES.map(w => (
@@ -417,7 +418,40 @@ const styles = {
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginBottom: 22,
+    marginBottom: 14,
+  },
+  headerBtns: {
+    display: 'flex',
+    gap: 8,
+    alignItems: 'stretch',
+    marginBottom: 20,
+  },
+  headerBtn: {
+    flex: 1,
+    minWidth: 0,
+    background: 'var(--card)',
+    color: 'var(--moss-deep)',
+    border: '1.5px solid var(--moss-deep)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '10px 8px',
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+  },
+  headerBtnPrimary: {
+    flex: 1,
+    minWidth: 0,
+    background: 'var(--moss-deep)',
+    color: '#FFF',
+    border: '1.5px solid var(--moss-deep)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '10px 8px',
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+    whiteSpace: 'nowrap',
   },
   eyebrow: {
     margin: '0 0 2px',
