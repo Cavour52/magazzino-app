@@ -485,6 +485,7 @@ const styles = {
     gap: 8,
     fontSize: 13,
     color: 'var(--ink-soft)',
+    marginTop: 14,
     marginBottom: 14,
   },
   changeUserBtn: {
