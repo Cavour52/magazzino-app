@@ -546,7 +546,7 @@ const styles = {
   warehouseTabs: {
     display: 'flex',
     gap: 6,
-    marginBottom: 18,
+    marginBottom: 8,
     background: 'var(--card)',
     border: '1px solid var(--line)',
     borderRadius: 'var(--radius-md)',
