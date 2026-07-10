@@ -211,23 +211,9 @@ export default function App() {
   return (
     <div style={styles.page}>
       <header style={styles.header}>
-        <div>
-          <p style={styles.eyebrow}>Scorte in tempo reale</p>
-          <h1 style={styles.title}>{warehouse === 'all' ? 'Tutti i magazzini' : warehouse}</h1>
-        </div>
+        <p style={styles.eyebrow}>Scorte in tempo reale</p>
+        <h1 style={styles.title}>{warehouse === 'all' ? 'Tutti' : warehouse}</h1>
       </header>
-
-      <div style={styles.headerBtns}>
-        <button style={styles.headerBtn} onClick={() => { setHistoryProduct(null); setHistoryOpen(true) }}>
-          Storico
-        </button>
-        <button style={styles.headerBtn} onClick={() => setOrderOpen(true)}>
-          Ordina
-        </button>
-        <button style={styles.headerBtnPrimary} onClick={() => { setEditing(null); setModalOpen(true) }}>
-          + Prodotto
-        </button>
-      </div>
 
       <div style={styles.warehouseTabs}>
         {WAREHOUSES.map(w => (
@@ -243,7 +229,19 @@ export default function App() {
           style={{ ...styles.warehouseTab, ...(warehouse === 'all' ? styles.warehouseTabActive : {}) }}
           onClick={() => setWarehouse('all')}
         >
-          Tutti i magazzini
+          Tutti
+        </button>
+      </div>
+
+      <div style={styles.headerBtns}>
+        <button style={styles.headerBtn} onClick={() => { setHistoryProduct(null); setHistoryOpen(true) }}>
+          Storico
+        </button>
+        <button style={styles.headerBtn} onClick={() => setOrderOpen(true)}>
+          Ordina
+        </button>
+        <button style={styles.headerBtnPrimary} onClick={() => { setEditing(null); setModalOpen(true) }}>
+          + Prodotto
         </button>
       </div>
 
@@ -416,8 +414,9 @@ const styles = {
   },
   header: {
     display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    gap: 10,
+    flexWrap: 'wrap',
     marginBottom: 14,
   },
   headerBtns: {
@@ -454,7 +453,7 @@ const styles = {
     whiteSpace: 'nowrap',
   },
   eyebrow: {
-    margin: '0 0 2px',
+    margin: 0,
     fontSize: 12,
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
@@ -463,7 +462,7 @@ const styles = {
   },
   title: {
     margin: 0,
-    fontSize: 30,
+    fontSize: 24,
     color: 'var(--ink)',
   },
   addBtn: {
