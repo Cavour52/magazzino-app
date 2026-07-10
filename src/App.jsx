@@ -276,19 +276,19 @@ export default function App() {
 
       <div style={styles.filterRow}>
         <select style={styles.selectHalf} value={filter} onChange={e => setFilter(e.target.value)}>
-          <option value="all">Tutti</option>
+          <option value="all">Prodotti</option>
           <option value="ok">Disponibili</option>
           <option value="low">In esaurimento</option>
           <option value="out">Esauriti</option>
         </select>
         <select style={styles.selectHalf} value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)}>
-          <option value="all">Tutti i fornitori</option>
+          <option value="all">Fornitori</option>
           {suppliers.map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
         <select style={styles.selectHalf} value={managerFilter} onChange={e => setManagerFilter(e.target.value)}>
-          <option value="all">Tutti i responsabili</option>
+          <option value="all">Operatori</option>
           {managers.map(m => (
             <option key={m} value={m}>{m}</option>
           ))}
