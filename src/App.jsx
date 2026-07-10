@@ -23,6 +23,7 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
   const [supplierFilter, setSupplierFilter] = useState('all')
+  const [managerFilter, setManagerFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [orderOpen, setOrderOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
@@ -127,8 +128,9 @@ export default function App() {
     let list = inWarehouse.filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
     if (filter !== 'all') list = list.filter(p => statusOf(p) === filter)
     if (supplierFilter !== 'all') list = list.filter(p => p.supplier === supplierFilter)
+    if (managerFilter !== 'all') list = list.filter(p => p.manager === managerFilter)
     return list.sort((a, b) => a.name.localeCompare(b.name, 'it', { sensitivity: 'base' }))
-  }, [inWarehouse, query, filter, supplierFilter])
+  }, [inWarehouse, query, filter, supplierFilter, managerFilter])
 
   const counts = useMemo(() => ({
     total: inWarehouse.length,
@@ -283,6 +285,12 @@ export default function App() {
           <option value="all">Tutti i fornitori</option>
           {suppliers.map(s => (
             <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select style={styles.selectHalf} value={managerFilter} onChange={e => setManagerFilter(e.target.value)}>
+          <option value="all">Tutti i responsabili</option>
+          {managers.map(m => (
+            <option key={m} value={m}>{m}</option>
           ))}
         </select>
       </div>
